@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .pull-right { float: right; }
+      .pull-right.col6 { width: 50%; }
+      .pull-right h2 { margin-top: 0; }
+      img { max-width: 100%; height: auto; }
+      .badge { float: left; max-width: 54px; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+name: start
+class: center, middle
+
+![](elm.svg)
+
+
+# Elm for JS-Developers
+
+@PierreBeitz
+
+pb@naymspace.de
+
+???
+
+* hallo (- jack franklyn)
+* ich
+* naymspace
+
+
+---
+
+
+# The great tooling problem
+
+.pull-right.col6[
+![](js.png)
+]
+
+???
++ we wanna build large apps easily
++ angular / react, many frameworks
+--
+
+We must accept that complex applications are hard to build
+
+--
+
+## Trends in complex JS-Apps
+
+* Two-way-data-binding
+* Object.observe
+* MVC / MVVC
+
+???
+* was so popular, that Object.observe made it into chrome
+-> lets replicate rails
+
++ mvc works on server, but does not in the browser
+-> components
+  - in angular (2), ember, Vue.js, Cycle.js, React
+  - wir bauen apps als baum von componenten, wiren sie up usw...
+
+
+---
+
+# Components in some form
+
+* Angular
+* Ember
+* Polymer
+* React
+* Vue.js
+
+--
+
+### Who likes JS anymore?
+
+* GWT
+* coffeescript
+* typescript
+* sweet.js
+* dart
+* flow
+
+???
+
+* who really likes js anymore.
+* we are transpiling: typescript, coffeescript
+* js ist keine schlechte sprache aber nicht das richtige tool für große projekte.
+
+---
+
+# WAT (@garybernhardt)
+
+
+```javascript
+> []+[]
+```
+--
+
+```javascript
+< ""
+```
+--
+
+```javascript
+> {}+""
+```
+--
+
+```javascript
+< 0
+```
+--
+
+```javascript
+> ""+{}
+```
+--
+
+```javascript
+< "[object Object]"
+```
+
+---
+# What if we could restart from scratch?
+???
+
+* reißbrett fürs perfekte framework (was wäre wenn eine komplett neues ding, das sich ideen von hier und da borgt, um diese probleme zu lösen)
+--
+
+.pull-right[
+![](dataflow.png)
+]
+* unidirectional data flow
+--
+
+* single source of truth
+???
+(ask other frameworks)
+--
+
+* stateless view functions
+???
+just takes some state and returns view (wie react, on server)
+--
+
+* explicit actions
+???
+(updates) wie flux, redux: wir haben actions die state modifizieren
+--
+
+* testability
+--
+
+* immutability
+--
+
+* explicit vs magic
+
+???
+
++ data always in a circle
+-> easy to reason about
+-> does not hop around
+-> nice to debug
+
+---
+# $scope
+
+
+<video style="max-width: 100%;" src="portal.mp4" autoplay loop></video>
+
+---
+
+# Enter Elm
+
+### Disclaimer
+
+* not the perfect language (yet?)
+* not the perfect solution to all our problems
+
+???
+* it might in certain situations be the tool for the job
+--
+
+### Classification
+
+* functional
+* staticly typed
+* compiled
+--
+
+
+
+* expressive, clear code
+* self documenting
+* robust
+???
+* people are using it in prod for almost a year
+* no runtime errors over 100000nd users over months and months
+---
+
+name: claims
+
+# Claims
+
+.img-responsive[![](claims.png)]
+
+???
+no runtime exceptions - @noredink monate! wir, wochen.
+once it compiles, it works!
+almost no more debugging!
+
+---
+
+background-image: url(truthy.png)
+# Friendly Error Messages
+
+
+---
+background-image: url(big-record.png)
+
+---
+background-image: url(incomplete.png)
+
+---
+template: claims
+
+---
+background-image: url(perf.png)
+
+---
+template: claims
+---
+background-image: url(semver.jpg)
+
+---
+background-image: url(package.png)
+
+
+---
+template: claims
+
+---
+
+# Expressive, Clear Code
+
+### Functional Programming
+
+.badge[![](js.png)]
+```javascript
+add(1, 2)
+[1,2,3].map(x => x + 2)
+```
+
+
+.badge[![](elm.svg)]
+```elm
+(add 1 2)
+List.map ((+) 2) [1,2,3]
+```
+
+--
+
+### Pipes
+
+```elm
+listen session (attend barcamp (makePerson "Joe"))
+```
+
+```elm
+makePerson "Joe"
+|> attend barcamp
+|> listen session
+```
+
+---
+
+# Expressive, Clear Code
+
+### Records
+
+```elm
+attendBarcamp person =
+  { person | location = "Barcamp Kiel 2016" }
+```
+
+--
+
+```elm
+List.map .location
+  [ { name = "Arthur Dent"
+    , location = "Towel Department"
+    }
+  , { name = "Marin"
+    , location = "Barcamp"
+    }
+  ]
+```
+---
+
+# Self-documenting
+
+### Types
+
+```elm
+add: Int -> Int -> Int
+add x y =
+  x + y
+```
+???
+
+--
+
+### Union Types
+
+```elm
+  type Filter
+    = ShowAll
+    | ShowCompleted
+    | ShowActive
+  showTodos: Filter -> List Todo -> List Todo
+  showTodos filter todos =
+    case filter of
+      ShowAll -> todos
+      ShowCompleted -> List.filter (\t -> t.complete) todos
+      ShowActive -> List.filter (\t -> not t.complete) todos
+```
+
+???
+- Checked by compiler (spots typos)
+- compiler garantiert, dass alle fälle behandelt wurden
+- easy to change: add one, fix compiler errors, done
+
+
+---
+
+# Self-documenting
+
+### Type Aliases
+```elm
+type alias Person =
+  { name: String
+  , age: Int
+  }
+
+incrementAge : Person -> Person
+incrementAge person =
+  { person | age = person.age + 1 }
+```
+
+???
+- clearer code in domain specific objects
+- compiler guarantees that you meet type requirements
+- no `undefined is not a function`
+
+---
+
+# Robust
+
+### Immutability
+
+
+.badge[ ![](js.png) ]
+
+```js
+  var person = { name: "Max", age: 42 };
+  incrementAge(person);
+```
+
+```elm
+  let
+    person = { name = "Max", age = 42 }
+  in
+    incrementAge person
+```
+
+???
+// return? (mutated? new reference?) keine chance von hier rauszufinden
+- did someone mutate this value? NOPE! values can not be mutated
+* goodbye mutation bugs
+
+
+---
+
+# Robust
+
+### Maybe
+
+```elm
+  type Maybe = Just a | Nothing
+
+  type alias Model = {
+    user : Maybe User
+  }
+
+  view : Model -> Html Msg
+  view model =
+    case model.user of
+      Nothing ->
+        div [] [ text "no user!" ]
+      Just user ->
+        div [] [ text ("Logged in as " ++ user.name) ]
+```
+
+???
+- im a lazy developer. but elm does not let me not handle edge cases.
+    * you must handle all cases of pending / missing data
+
+---
+
+# Modules
+
+```elm
+
+module Calc exposing (add)
+
+import Math as M exposing (sqrt)
+import My.Library -- ./My/Library.elm
+
+add x y =
+  x + y
+
+pow x y =
+  M.pow x y
+
+someCalculation x y =
+  sqrt x y
+
+```
+
+???
+- everything is scoped
+- modules explicitly declare what they expose
+- modules explicitly declare what they import
+- not so far from es2015
+
+---
+
+# Cmd
+
+> an async thing that elm should run for you
+
+# Sub
+
+>a subsciption to some data you care about that might change
+
+---
+
+# Counter Example
+
+--
+
+feels like a lot of code...
+
+--
+
+* boilerplate vs explicitness
+* elm is the complete opposite of magic
+* benefits increase as app grows
+
+???
+
+- for an example like this it does not matter what you write it in
+
+- did this function hit localstorage? no! it returns a string! move on! debugging experience!
+- did i miss any cases in this refactor? nope! the compiler would have told me!
+
+- defining app step by step
+  1: define model
+  2: define actions
+  3: update function
+  4: define view
+  5: repeat
+
+---
+
+
+class: center, middle
+
+# How to scale things up?
+
+---
+
+# The Elm Architecture
+
+```elm
+  model : Model
+  view : Model -> Html Msg
+  update : Msg -> Model -> Model
+```
+
+![](TEA.png)
+
+???
+
+@startuml
+State View {
+  State NestedView
+}
+State Model {
+  State NestedModel
+}
+State Update {
+  State NestedUpdate
+}
+
+View -right-> Update : Msg
+Update --> Model
+Model --> View
+@enduml
+
+---
+
+# Adjustment time
+
+  * syntax
+  * types
+  * immutability
+  * compiling!
+  * `maybe` and explicit error handling
+
+---
+
+# Ecosystem
+
+.pull-right.col6[
+## Learning
+
+* guide.elm-lang.org
+* elm-lang.org/docs
+]
+## People
+
+* Evan Czaplicki (@czaplic)
+* Richard Feldman (@rtfeldman)
+
+
+## Tech
+
+* elm reactor
+* elm package
+* elm-webpack with HMR
+* time traveling debugger
+
+???
++ do you approve of this plan
++ may i add that to elm-package.json for you?
++ semantic version management required (screen)
+
+---
+
+# Why should you use elm?
+
+- `undefined is not a function`
+- packages breaking semantic versioning
+- you want to develop with the confidence of types and a clever compiler to back you up
+- you want to contribute to a language/ecosystem still growing and settling down
+
+--
+
+> language brings many concepts that are language/framework-agnostic
+
+???
+- the elm architecture
+- expliciteness across your app
+- types (typescript)
+- immutability / functional programming
+
+---
+
+# We are hiring
+--
+
+# Hire us for know how
+
+---
+
+template: start
+
+# Thank you for listening!
+---
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
